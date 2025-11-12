@@ -7,4 +7,22 @@ requires-python = ">=3.12"
 dependencies = [
     "fastapi>=0.121.1",
     "uvicorn>=0.38.0",
+    "sqlalchemy[asyncio]>=2.0.44",
+    "pydantic>=2.12.4",
+    "python-dotenv>=1.2.1",
+    "asyncpg>=0.30.0",
+    "aiosqlite>=0.21.0",
+    "psycopg[binary]>=3.2.12",
+]
+
+# --- Development / optional dependencies ---
+[project.optional-dependencies]
+dev = [
+    "ruff>=0.14.4",
+    "isort>=7.0.0",
+    "mypy>=1.18.2",
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.25.0",
+    "httpx>=0.28.0",
+    "alembic>=1.14.0",
 ]
