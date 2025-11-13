@@ -13,11 +13,6 @@ dependencies = [
     "asyncpg>=0.30.0",
     "aiosqlite>=0.21.0",
     "psycopg[binary]>=3.2.12",
-]
-
-# --- Development / optional dependencies ---
-[project.optional-dependencies]
-dev = [
     "ruff>=0.14.4",
     "isort>=7.0.0",
     "mypy>=1.18.2",
