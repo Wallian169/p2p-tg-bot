@@ -54,6 +54,7 @@ class Order(Base):
     owner_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
     action: Mapped[OrderAction] = mapped_column(Enum(OrderAction, name="orderAction"), nullable=False)
     currency_id: Mapped[int] = mapped_column(ForeignKey("currencies.id"))
+    rate: Mapped[Decimal] = mapped_column(Numeric(5, 2), nullable=False)
     amount: Mapped[Decimal] = mapped_column(Numeric(10, 2), nullable=False)
     description: Mapped[str | None] = mapped_column(String(200), nullable=True)
     payment_methods: Mapped[list[PaymentMethod]] = relationship(
