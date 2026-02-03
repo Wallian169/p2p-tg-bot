@@ -31,7 +31,7 @@ class Currency(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(100), unique=True, nullable=False)
-    symbol: Mapped[str] = mapped_column(String(10), nullable=False)
+    symbol = Column(String, unique=True, nullable=False, index=True)
     icon: Mapped[str | None] = mapped_column(String, nullable=True)
 
 class User(Base):
