@@ -2,7 +2,7 @@ from datetime import datetime
 from decimal import Decimal
 from enum import Enum as PyEnum
 
-from sqlalchemy import String, ForeignKey, Enum, Numeric, DateTime, func, Column, Table
+from sqlalchemy import String, ForeignKey, Enum, Numeric, DateTime, func, Column, Table, BigInteger
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 
@@ -37,6 +37,7 @@ class Currency(Base):
 class User(Base):
     __tablename__ = "users"
     id: Mapped[int] = mapped_column(primary_key=True)
+    telegram_id: Mapped[int] = mapped_column(BigInteger, unique=True, nullable=False)
     uuid: Mapped[str] = mapped_column(String(100), unique=True, nullable=False)
     picture: Mapped[str] = mapped_column(String, nullable=True)
     username: Mapped[str] = mapped_column(String(32), nullable=False)
@@ -46,6 +47,12 @@ class OrderAction(PyEnum):
     BUY = "BUY"
     SELL = "SELL"
 
+class OrderStatus(PyEnum):
+    PENDING = "PENDING"
+    ACTIVE = "ACTIVE"
+    COMPLETED = "COMPLETED"
+    CANCELLED = "CANCELLED"
+    HIDDEN = "HIDDEN"
 
 class Order(Base):
     __tablename__ = "orders"
@@ -53,6 +60,11 @@ class Order(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     owner_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
     action: Mapped[OrderAction] = mapped_column(Enum(OrderAction, name="orderAction"), nullable=False)
+    status: Mapped[OrderStatus] = mapped_column(
+        Enum(OrderStatus, name="orderStatus"),
+        default=OrderStatus.ACTIVE,
+        nullable=False
+    )
     currency_id: Mapped[int] = mapped_column(ForeignKey("currencies.id"))
     rate: Mapped[Decimal] = mapped_column(Numeric(5, 2), nullable=False)
     amount: Mapped[Decimal] = mapped_column(Numeric(10, 2), nullable=False)
