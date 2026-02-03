@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 from enum import Enum as PyEnum
 
@@ -87,3 +87,32 @@ class Order(Base):
 
     owner = relationship("User")
     currency_obj = relationship("Currency")
+
+class DealStatus(PyEnum):
+    PENDING = "pending"
+    PAID = "paid"
+    COMPLETED = "completed"
+    CANCELLED = "cancelled"
+
+class Deal(Base):
+    __tablename__ = "deals"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+
+    order_id: Mapped[int] = mapped_column(ForeignKey("orders.id"))
+    buyer_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    seller_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+
+    amount: Mapped[Decimal] = mapped_column(Numeric(10, 2), nullable=False)
+    rate: Mapped[Decimal] = mapped_column(Numeric(5, 2), nullable=False)
+
+    status: Mapped[DealStatus] = mapped_column(
+        Enum(DealStatus, name="deal_status"),
+        default=DealStatus.PENDING,
+        nullable=False
+    )
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+    expires_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        default=lambda: datetime.now(timezone.utc) + timedelta(minutes=15)
+    )
