@@ -44,6 +44,7 @@ class CurrencyRead(Currency):
 
 class UserBase(ORMBase):
     uuid: str
+    telegram_id: int
     username: str
     picture: str | None = None
 
