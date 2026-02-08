@@ -9,6 +9,7 @@ from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 class Base(DeclarativeBase):
     pass
 
+
 class PaymentMethod(Base):
     __tablename__ = "payment_methods"
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -19,12 +20,14 @@ class PaymentMethod(Base):
         back_populates="payment_methods",
     )
 
+
 order_payment_methods = Table(
     "order_payment_methods",
     Base.metadata,
     Column("order_id", ForeignKey("orders.id"), primary_key=True),
-    Column("payment_method_id", ForeignKey("payment_methods.id"), primary_key=True)
+    Column("payment_method_id", ForeignKey("payment_methods.id"), primary_key=True),
 )
+
 
 class Currency(Base):
     __tablename__ = "currencies"
@@ -33,6 +36,7 @@ class Currency(Base):
     name: Mapped[str] = mapped_column(String(100), unique=True, nullable=False)
     symbol = Column(String, unique=True, nullable=False, index=True)
     icon: Mapped[str | None] = mapped_column(String, nullable=True)
+
 
 class User(Base):
     __tablename__ = "users"
@@ -43,9 +47,10 @@ class User(Base):
     username: Mapped[str] = mapped_column(String(32), nullable=False)
 
 
-class OrderAction(PyEnum):
+class OrderAction(str, PyEnum):
     BUY = "BUY"
     SELL = "SELL"
+
 
 class OrderStatus(PyEnum):
     PENDING = "PENDING"
@@ -54,16 +59,17 @@ class OrderStatus(PyEnum):
     CANCELLED = "CANCELLED"
     HIDDEN = "HIDDEN"
 
+
 class Order(Base):
     __tablename__ = "orders"
 
     id: Mapped[int] = mapped_column(primary_key=True)
     owner_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
-    action: Mapped[OrderAction] = mapped_column(Enum(OrderAction, name="orderAction"), nullable=False)
+    action: Mapped[OrderAction] = mapped_column(
+        Enum(OrderAction, name="orderAction"), nullable=False
+    )
     status: Mapped[OrderStatus] = mapped_column(
-        Enum(OrderStatus, name="orderStatus"),
-        default=OrderStatus.ACTIVE,
-        nullable=False
+        Enum(OrderStatus, name="orderStatus"), default=OrderStatus.ACTIVE, nullable=False
     )
     currency_id: Mapped[int] = mapped_column(ForeignKey("currencies.id"))
     rate: Mapped[Decimal] = mapped_column(Numeric(5, 2), nullable=False)
@@ -88,11 +94,13 @@ class Order(Base):
     owner = relationship("User")
     currency_obj = relationship("Currency")
 
+
 class DealStatus(PyEnum):
     PENDING = "pending"
     PAID = "paid"
     COMPLETED = "completed"
     CANCELLED = "cancelled"
+
 
 class Deal(Base):
     __tablename__ = "deals"
@@ -107,12 +115,9 @@ class Deal(Base):
     rate: Mapped[Decimal] = mapped_column(Numeric(5, 2), nullable=False)
 
     status: Mapped[DealStatus] = mapped_column(
-        Enum(DealStatus, name="deal_status"),
-        default=DealStatus.PENDING,
-        nullable=False
+        Enum(DealStatus, name="deal_status"), default=DealStatus.PENDING, nullable=False
     )
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
     expires_at: Mapped[datetime] = mapped_column(
-        DateTime,
-        default=lambda: datetime.now(UTC) + timedelta(minutes=15)
+        DateTime, default=lambda: datetime.now(UTC) + timedelta(minutes=15)
     )
