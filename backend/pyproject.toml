@@ -26,9 +26,10 @@ dev = [
 ]
 [tool.ruff]
 
-line-length = 120
-
-[tool.ruff.lint]
+line-length = 100
+extend-exclude = ["migration/versions"]
+[tool.ruff.lint.per-file-ignores]
+"app/schemas.py" = ["N805"]
 
 select = ["E", "F", "I", "N", "UP"]
 

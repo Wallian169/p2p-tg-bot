@@ -1,9 +1,8 @@
 from datetime import datetime
 from decimal import Decimal
 from enum import Enum
-from typing import Optional, List
 
-from pydantic import BaseModel, field_validator, Field
+from pydantic import BaseModel, Field, field_validator
 
 
 class ORMBase(BaseModel):
@@ -72,7 +71,7 @@ class OrderBase(ORMBase):
     currency_id: int
     action: OrderAction
     amount: Decimal
-    description: Optional[str] = Field(None, max_length=200)
+    description: str | None = Field(None, max_length=200)
 
     @field_validator("amount")
     def amount_must_be_positive(cls, v):
@@ -82,13 +81,13 @@ class OrderBase(ORMBase):
 
 
 class OrderCreate(OrderBase):
-    payment_method_ids: List[int] = []
+    payment_method_ids: list[int] = []
 
 
 class OrderUpdate(ORMBase):
-    amount: Optional[Decimal] = None
-    description: Optional[str] = None
-    payment_method_ids: Optional[List[int]] = None
+    amount: Decimal | None = None
+    description: str | None = None
+    payment_method_ids: list[int] | None = None
 
     @field_validator("amount")
     def amount_must_be_positive(cls, v):
@@ -103,10 +102,10 @@ class OrderRead(ORMBase):
     currency_id: int
     action: OrderAction
     amount: Decimal
-    description: Optional[str]
+    description: str | None
     created_at: datetime
     updated_at: datetime
 
     owner: UserRead
     currency_obj: CurrencyRead
-    payment_methods: List[PaymentMethodRead]
+    payment_methods: list[PaymentMethodRead]

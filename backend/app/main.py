@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+
 from app.routers.currencies import currency_router
 from app.routers.users import user_router
 

@@ -1,8 +1,8 @@
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from decimal import Decimal
 from enum import Enum as PyEnum
 
-from sqlalchemy import String, ForeignKey, Enum, Numeric, DateTime, func, Column, Table, BigInteger
+from sqlalchemy import BigInteger, Column, DateTime, Enum, ForeignKey, Numeric, String, Table, func
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 
@@ -114,5 +114,5 @@ class Deal(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
     expires_at: Mapped[datetime] = mapped_column(
         DateTime,
-        default=lambda: datetime.now(timezone.utc) + timedelta(minutes=15)
+        default=lambda: datetime.now(UTC) + timedelta(minutes=15)
     )

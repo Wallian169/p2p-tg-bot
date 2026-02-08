@@ -5,7 +5,7 @@ from starlette import status
 
 from app.db_session import get_session
 from app.models import User
-from app.schemas import UserRead, UserCreate
+from app.schemas import UserCreate, UserRead
 
 user_router = APIRouter(prefix="/users", tags=["Users"])
 
