@@ -59,12 +59,16 @@ ORDERS_PER_PAGE = 20
 async def get_orders(
     currency_id: int,
     action: Annotated[OrderAction, Query(description="Buy or sell")],
-    page: Annotated[int, Query(ge=0)] = 0,
+    page: Annotated[int, Query(ge=1)] = 1,
     session: AsyncSession = Depends(get_session),
 ):
     stmt = (
         select(Order)
-        .options(joinedload(Order.owner), selectinload(Order.payment_methods))
+        .options(
+            joinedload(Order.owner),
+            joinedload(Order.currency_obj),
+            selectinload(Order.payment_methods),
+        )
         .where(
             Order.currency_id == currency_id,
             Order.status == OrderStatus.ACTIVE,
@@ -83,3 +87,22 @@ async def get_orders(
 
     result = await session.execute(stmt)
     return result.scalars().unique().all()
+
+
+@orders_router.patch("/{order_id}/cancel", status_code=status.HTTP_202_ACCEPTED)
+async def cancel_order(order_id: int, session: AsyncSession = Depends(get_session)):
+    result = await session.execute(select(Order).where(Order.id == order_id))
+    order = result.scalar_one_or_none()
+
+    if not order:
+        raise HTTPException(status_code=404, detail=f"Order with {order_id} does not exist")
+
+    if order.status == OrderStatus.CANCELLED:
+        raise HTTPException(status_code=400, detail="Order already canceled")
+
+    order.status = OrderStatus.CANCELLED
+
+    await session.commit()
+    await session.refresh(order)  # Оновлюємо об'єкт перед поверненням
+
+    return {"order_id": order.id, "status": order.status}
