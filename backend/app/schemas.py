@@ -67,10 +67,14 @@ class OrderAction(str, Enum):
 
 
 class OrderBase(ORMBase):
-    owner_id: int
     currency_id: int
     action: OrderAction
-    amount: Decimal
+    amount: Decimal = Field(
+        max_digits=10,
+        decimal_places=2,
+        examples=[100.50],
+    )
+    rate: Decimal = Field(max_digits=5, decimal_places=2, examples=[41.50])
     description: str | None = Field(None, max_length=200)
 
     @field_validator("amount")
@@ -81,7 +85,14 @@ class OrderBase(ORMBase):
 
 
 class OrderCreate(OrderBase):
-    payment_method_ids: list[int] = []
+    payment_methods: list[int] = []
+
+    @field_validator("payment_methods")
+    @classmethod
+    def check_at_least_one_method(cls, v: list[int]) -> list[int]:
+        if not v or len(v) == 0:
+            raise ValueError("At least one method must be provided")
+        return v
 
 
 class OrderUpdate(ORMBase):
@@ -96,12 +107,10 @@ class OrderUpdate(ORMBase):
         return v
 
 
-class OrderRead(ORMBase):
+class OrderRead(OrderBase):
     id: int
     owner_id: int
     currency_id: int
-    action: OrderAction
-    amount: Decimal
     description: str | None
     created_at: datetime
     updated_at: datetime
