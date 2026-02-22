@@ -53,10 +53,11 @@ class OrderAction(str, PyEnum):
 
 
 class OrderStatus(PyEnum):
-    ACTIVE = "ACTIVE"
-    COMPLETED = "COMPLETED"
-    CANCELLED = "CANCELLED"
-    HIDDEN = "HIDDEN"
+    ACTIVE = "ACTIVE" ## listed for all
+    COMPLETED = "COMPLETED" ## hidden
+    CANCELLED = "CANCELLED" ## listed in account details
+    PENDING = "PENDING" ## listed in account details
+    EXPIRED = "EXPIRED" ## listed in account
 
 
 class Order(Base):
@@ -89,16 +90,18 @@ class Order(Base):
         onupdate=func.now(),
         nullable=False,
     )
+    expires_at: Mapped[datetime] = mapped_column(
+        DateTime, default=lambda: datetime.now(UTC) + timedelta(days=7)
+    )
 
     owner = relationship("User")
     currency_obj = relationship("Currency")
 
 
 class DealStatus(PyEnum):
-    PENDING = "pending"
-    PAID = "paid"
-    COMPLETED = "completed"
-    CANCELLED = "cancelled"
+    PENDING = "pending" ## listed in pending orders
+    PAID = "paid" ## maybe list?
+    CANCELLED = "cancelled" ## maybe list?
 
 
 class Deal(Base):
@@ -107,8 +110,8 @@ class Deal(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
 
     order_id: Mapped[int] = mapped_column(ForeignKey("orders.id"))
-    buyer_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
-    seller_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    buyer_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
+    seller_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
 
     amount: Mapped[Decimal] = mapped_column(Numeric(10, 2), nullable=False)
     rate: Mapped[Decimal] = mapped_column(Numeric(5, 2), nullable=False)
@@ -118,5 +121,5 @@ class Deal(Base):
     )
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
     expires_at: Mapped[datetime] = mapped_column(
-        DateTime, default=lambda: datetime.now(UTC) + timedelta(minutes=15)
+        DateTime, default=lambda: datetime.now(UTC) + timedelta(days=1)
     )
