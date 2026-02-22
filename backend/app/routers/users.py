@@ -14,7 +14,7 @@ user_router = APIRouter(prefix="/users", tags=["Users"])
     "/",
     response_model=UserRead,
     status_code=status.HTTP_201_CREATED,
-    responses={400: {"description": "User already registered or other client error"}}
+    responses={400: {"description": "User already registered or other client error"}},
 )
 async def create_user(user_in: UserCreate, session: AsyncSession = Depends(get_session)):
     # Перевіряємо, чи юзер уже існує
@@ -28,6 +28,7 @@ async def create_user(user_in: UserCreate, session: AsyncSession = Depends(get_s
     await session.refresh(new_user)
     return new_user
 
+
 @user_router.get("/me", response_model=UserRead, responses={404: {"description": "User not found"}})
 async def get_user(telegram_id: int, session: AsyncSession = Depends(get_session)):
     result = await session.execute(select(User).where(User.telegram_id == telegram_id))
@@ -35,4 +36,3 @@ async def get_user(telegram_id: int, session: AsyncSession = Depends(get_session
     if user:
         return user
     raise HTTPException(status_code=404, detail="User not found")
-
