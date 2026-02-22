@@ -53,7 +53,6 @@ class OrderAction(str, PyEnum):
 
 
 class OrderStatus(PyEnum):
-    PENDING = "PENDING"
     ACTIVE = "ACTIVE"
     COMPLETED = "COMPLETED"
     CANCELLED = "CANCELLED"
