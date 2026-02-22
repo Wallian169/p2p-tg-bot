@@ -66,52 +66,46 @@ class OrderAction(str, Enum):
     SELL = "SELL"
 
 
-class OrderBase(ORMBase):
-    currency_id: int
-    action: OrderAction
-    amount: Decimal = Field(
-        max_digits=10,
-        decimal_places=2,
-        examples=[100.50],
-    )
-    rate: Decimal = Field(max_digits=5, decimal_places=2, examples=[41.50])
-    description: str | None = Field(None, max_length=200)
-
-    @field_validator("amount")
-    def amount_must_be_positive(cls, v):
-        if v <= 0:
-            raise ValueError("Amount must be greater than zero")
+class OrderValidatorMixin:
+    @field_validator("amount", "rate", mode="after")
+    @classmethod
+    def must_be_positive(cls, v: Decimal | None) -> Decimal | None:
+        if v is not None and v <= 0:
+            raise ValueError("Value must be greater than zero")
         return v
 
-
-class OrderCreate(OrderBase):
-    payment_methods: list[int] = []
-
-    @field_validator("payment_methods")
+    @field_validator("payment_methods", mode="after", check_fields=False)
     @classmethod
-    def check_at_least_one_method(cls, v: list[int]) -> list[int]:
-        if not v or len(v) == 0:
+    def check_at_least_one_method(cls, v: list[int] | None) -> list[int] | None:
+        # We only validate if the field is actually provided (not None)
+        if v is not None and len(v) == 0:
             raise ValueError("At least one method must be provided")
         return v
 
 
-class OrderUpdate(ORMBase):
-    amount: Decimal | None = None
-    description: str | None = None
-    payment_method_ids: list[int] | None = None
+class OrderBase(ORMBase):
+    currency_id: int = Field(..., gt=0, examples=[1])
+    action: OrderAction
+    amount: Decimal = Field(max_digits=10, decimal_places=2, examples=[100.50])
+    rate: Decimal = Field(max_digits=5, decimal_places=2, examples=[41.50])
+    description: str | None = Field(None, max_length=200)
 
-    @field_validator("amount")
-    def amount_must_be_positive(cls, v):
-        if v is not None and v <= 0:
-            raise ValueError("Amount must be greater than zero")
-        return v
+
+class OrderCreate(OrderBase, OrderValidatorMixin):
+    payment_methods: list[int] = Field(..., min_length=1)
+
+
+class OrderUpdate(OrderValidatorMixin, ORMBase):
+    # All fields optional for PATCH requests
+    amount: Decimal | None = Field(None, max_digits=10, decimal_places=2)
+    rate: Decimal | None = Field(None, max_digits=5, decimal_places=2)
+    description: str | None = Field(None, max_length=200)
+    payment_methods: list[int] | None = Field(None, examples=[[1, 2]])
 
 
 class OrderRead(OrderBase):
     id: int
     owner_id: int
-    currency_id: int
-    description: str | None
     created_at: datetime
     updated_at: datetime
 
