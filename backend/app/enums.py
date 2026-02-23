@@ -1,7 +1,7 @@
 from enum import Enum as PyEnum
 
 
-class gitOrderAction(str, PyEnum):
+class OrderAction(PyEnum):
     BUY = "BUY"
     SELL = "SELL"
 
