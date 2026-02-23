@@ -1,9 +1,10 @@
 from datetime import UTC, datetime, timedelta
 from decimal import Decimal
-from enum import Enum as PyEnum
 
 from sqlalchemy import BigInteger, Column, DateTime, Enum, ForeignKey, Numeric, String, Table, func
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
+
+from app.enums import OrderAction, OrderStatus, DealStatus
 
 
 class Base(DeclarativeBase):
@@ -47,19 +48,6 @@ class User(Base):
     username: Mapped[str] = mapped_column(String(32), nullable=False)
 
 
-class OrderAction(str, PyEnum):
-    BUY = "BUY"
-    SELL = "SELL"
-
-
-class OrderStatus(PyEnum):
-    ACTIVE = "ACTIVE" ## listed for all
-    COMPLETED = "COMPLETED" ## hidden
-    CANCELLED = "CANCELLED" ## listed in account details
-    PENDING = "PENDING" ## listed in account details
-    EXPIRED = "EXPIRED" ## listed in account
-
-
 class Order(Base):
     __tablename__ = "orders"
 
@@ -96,12 +84,6 @@ class Order(Base):
 
     owner = relationship("User")
     currency_obj = relationship("Currency")
-
-
-class DealStatus(PyEnum):
-    PENDING = "pending" ## listed in pending orders
-    PAID = "paid" ## maybe list?
-    CANCELLED = "cancelled" ## maybe list?
 
 
 class Deal(Base):

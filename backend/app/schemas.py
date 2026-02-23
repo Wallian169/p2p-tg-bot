@@ -4,6 +4,8 @@ from enum import Enum
 
 from pydantic import BaseModel, Field, field_validator
 
+from app.enums import OrderAction
+
 
 class ORMBase(BaseModel):
     model_config = {"from_attributes": True}
@@ -61,11 +63,6 @@ class UserRead(UserBase):
     id: int
 
 
-class OrderAction(str, Enum):
-    BUY = "BUY"
-    SELL = "SELL"
-
-
 class OrderValidatorMixin:
     @field_validator("amount", "rate", mode="after")
     @classmethod
@@ -92,7 +89,7 @@ class OrderBase(ORMBase):
 
 
 class OrderCreate(OrderBase, OrderValidatorMixin):
-    payment_methods: list[int] = Field(..., min_length=1)
+    payment_methods: list[int] = Field(None, examples=[[1, 2]])
 
 
 class OrderUpdate(OrderValidatorMixin, ORMBase):
