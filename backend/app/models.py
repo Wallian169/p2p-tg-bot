@@ -123,3 +123,5 @@ class Deal(Base):
     expires_at: Mapped[datetime] = mapped_column(
         DateTime, default=lambda: datetime.now(UTC) + timedelta(days=1)
     )
+
+    order_obj: Mapped[Order] = relationship("Order")
